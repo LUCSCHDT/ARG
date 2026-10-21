@@ -25,6 +25,7 @@ const auth = getAuth(app);
 const db = getDatabase(app);
 
 const ready = signInAnonymously(auth);
+export { auth, db, ready };
 
 export async function watchWorld(callback) {
     await ready;

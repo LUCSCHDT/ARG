@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>NEXUS CHAT</title>
+
+    <style>
+        body {
+            background: #111;
+            color: #00ff88;
+            font-family: monospace;
+            max-width: 700px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        #messages {
+            height: 400px;
+            overflow-y: auto;
+            border: 1px solid #00ff88;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .message {
+            margin-bottom: 12px;
+            overflow-wrap: anywhere;
+        }
+
+        input {
+            padding: 10px;
+            width: 70%;
+            box-sizing: border-box;
+        }
+
+        button {
+            padding: 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>NEXUS CHAT</h1>
+
+    <p id="status">CONNECTING...</p>
+
+    <div id="messages"></div>
+
+    <input id="messageInput"
+           maxlength="300"
+           placeholder="Écrire un message...">
+
+    <button id="sendButton">SEND</button>
+
+    <script type="module" src="js/chat.js"></script>
+</body>
+</html>
