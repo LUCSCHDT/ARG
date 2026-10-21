@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>NEXUS — REGISTER</title>
+
+    <style>
+        body {
+            background: #0b0f0d;
+            color: #00ff88;
+            font-family: monospace;
+            max-width: 450px;
+            margin: 100px auto;
+            padding: 20px;
+        }
+
+        input, button {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            margin: 12px 0;
+            box-sizing: border-box;
+        }
+
+        input {
+            background: #111;
+            border: 1px solid #00ff88;
+            color: white;
+        }
+
+        button {
+            background: #00ff88;
+            color: black;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>CREATE IDENTITY</h1>
+
+    <p>NEW PERSONNEL REGISTRATION</p>
+
+    <input
+        id="username"
+        placeholder="USERNAME"
+        maxlength="20"
+    >
+
+    <input
+        id="password"
+        type="password"
+        placeholder="ACCESS CODE"
+        maxlength="32"
+    >
+
+    <button id="register">
+        REGISTER
+    </button>
+
+    <p id="status"></p>
+
+    <script type="module" src="js/register.js"></script>
+</body>
+</html>
