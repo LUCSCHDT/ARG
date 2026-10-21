@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Panel</title>
+
+    <script src="js/auth.js"></script>
+    <script>
+        Auth.requireRole("admin");
+    </script>
+</head>
+
+<body style="
+    background:black;
+    color:red;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+    margin:0;
+">
+
+    <h1>ADMIN</h1>
+
+    <a href="indice.html">
+    <img src="assets/vraiment.webp"
+     alt="Document confidentiel"
+     width="400">
+
+    </a>
+
+    <button type="button">DO NOTHING</button>
+
+    <br>
+
+    <button onclick="Auth.logout()">LOGOUT</button>
+
+</body>
+</html>

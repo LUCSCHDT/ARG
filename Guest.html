@@ -1,0 +1,34 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Guest Panel</title>
+
+    <script src="js/auth.js"></script>
+    <script>
+        Auth.requireRole("guest");
+    </script>
+</head>
+
+<body style="
+    background:black;
+    color:white;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+    margin:0;
+">
+
+    <h1>GUEST</h1>
+
+    <button type="button">DO NOTHING</button>
+
+    <br>
+
+    <button onclick="Auth.logout()">LOGOUT</button>
+
+</body>
+</html>
