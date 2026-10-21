@@ -36,5 +36,40 @@
 
     <button onclick="Auth.logout()">LOGOUT</button>
 
+    <h2>GLOBAL CONTROL PANEL</h2>
+
+<button id="activateProtocol">
+    ACTIVATE PROTOCOL 47
+</button>
+
+<p id="worldStatus">Connecting to NEXUS...</p>
+
+<script type="module">
+    import {
+        watchWorld,
+        activateProtocol
+    } from "./js/firebase.js";
+
+    const status = document.getElementById("worldStatus");
+    const button = document.getElementById("activateProtocol");
+
+    watchWorld(active => {
+        status.textContent = active
+            ? "PROTOCOL 47 ACTIVE"
+            : "PROTOCOL 47 INACTIVE";
+
+        button.disabled = active;
+    }).catch(console.error);
+
+    button.addEventListener("click", async () => {
+        try {
+            await activateProtocol();
+        } catch (error) {
+            console.error(error);
+            status.textContent = "ACCESS ERROR";
+        }
+    });
+</script>
+
 </body>
 </html>

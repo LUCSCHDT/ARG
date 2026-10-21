@@ -29,6 +29,32 @@
     <br>
 
     <button onclick="Auth.logout()">LOGOUT</button>
+    <h2>NEXUS NETWORK STATUS</h2>
+
+<p id="worldStatus">Connecting...</p>
+
+<div id="secretArchive" hidden>
+    <h2>WARNING: NEW ARCHIVE DETECTED</h2>
+    <p>Protocol 47 has been activated.</p>
+
+    <a href="indice.html">
+        ACCESS CLASSIFIED ARCHIVE
+    </a>
+</div>
+
+<script type="module">
+    import { watchWorld } from "./js/firebase.js";
+
+    watchWorld(active => {
+        document.getElementById("worldStatus")
+            .textContent = active
+                ? "SYSTEM COMPROMISED"
+                : "SYSTEM ONLINE";
+
+        document.getElementById("secretArchive")
+            .hidden = !active;
+    }).catch(console.error);
+</script>
 
 </body>
 </html>
