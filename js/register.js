@@ -4,12 +4,33 @@ import {
     ref,
     get,
     set,
-    serverTimestamp
+    serverTimestamp,
+    runTransaction
 } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-database.js";
 
 const usernameInput = document.getElementById("username");
 const registerButton = document.getElementById("register");
 const status = document.getElementById("status");
+const usernameRef = ref(
+    db,
+    "usernames/" + normalizedUsername
+);
+
+const result = await runTransaction(
+    usernameRef,
+    currentValue => {
+        if (currentValue !== null) {
+            return;
+        }
+
+        return uid;
+    }
+);
+
+if (!result.committed) {
+    status.textContent = "USERNAME ALREADY TAKEN";
+    return;
+}
 
 registerButton.addEventListener("click", async () => {
     const username = usernameInput.value.trim();
