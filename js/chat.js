@@ -2,6 +2,7 @@ import { auth, db, ready } from "./firebase.js";
 
 import {
     ref,
+    get,
     push,
     onValue,
     query,
@@ -13,39 +14,63 @@ const input = document.getElementById("messageInput");
 const button = document.getElementById("sendButton");
 const status = document.getElementById("status");
 
+let myUsername = null;
+
 button.disabled = true;
 
 async function startChat() {
     await ready;
 
+    const uid = auth.currentUser.uid;
+
+    // Récupérer le profil du joueur
+    const playerSnapshot = await get(ref(db, "players/" + uid));
+
+    if (!playerSnapshot.exists()) {
+        status.textContent = "IDENTITY REQUIRED";
+        return;
+    }
+
+    myUsername = playerSnapshot.val().username;
+
+    status.textContent = "CONNECTED AS " + myUsername;
+
+    // Écouter les messages en direct
     const chatQuery = query(
         ref(db, "chat"),
         limitToLast(50)
     );
 
-    onValue(chatQuery, snapshot => {
+    onValue(chatQuery, async snapshot => {
         messagesBox.replaceChildren();
 
-        snapshot.forEach(child => {
-            const message = child.val();
+        const messageElements = [];
 
+        for (const child of Object.values(snapshot.val() || {})) {
             const div = document.createElement("div");
             div.className = "message";
 
-            const name = message.sender === auth.currentUser.uid
-                ? "YOU"
-                : "ANON";
+            // Ancien format : sender = UID Firebase
+            const sender = child.sender;
 
-            div.textContent = `[${name}] ${message.text}`;
+            const senderSnapshot = await get(
+                ref(db, "players/" + sender)
+            );
 
-            messagesBox.appendChild(div);
-        });
+            const username = senderSnapshot.exists()
+                ? senderSnapshot.val().username
+                : "UNKNOWN";
 
+            div.textContent = `[${username}] ${child.text}`;
+            messageElements.push(div);
+        }
+
+        messagesBox.replaceChildren(...messageElements);
         messagesBox.scrollTop = messagesBox.scrollHeight;
-        status.textContent = "CONNECTED";
+
     }, error => {
         console.error(error);
-        status.textContent = "READ ERROR";
+        status.textContent = "CHAT ERROR";
     });
 
     button.disabled = false;
@@ -54,19 +79,18 @@ async function startChat() {
 async function sendMessage() {
     const text = input.value.trim();
 
-    if (!text || text.length > 300) return;
+    if (!text || !myUsername) return;
 
     button.disabled = true;
 
     try {
-        await ready;
-
         await push(ref(db, "chat"), {
             sender: auth.currentUser.uid,
-            text: text
+            text
         });
 
         input.value = "";
+
     } catch (error) {
         console.error(error);
         status.textContent = "SEND ERROR";
@@ -78,9 +102,7 @@ async function sendMessage() {
 button.addEventListener("click", sendMessage);
 
 input.addEventListener("keydown", event => {
-    if (event.key === "Enter") {
-        sendMessage();
-    }
+    if (event.key === "Enter") sendMessage();
 });
 
 startChat().catch(error => {
