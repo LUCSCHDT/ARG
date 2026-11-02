@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>NEXUS — LOGIN</title>
+    <style>
+        body {
+            background: #0b0f0d;
+            color: #00ff88;
+            font-family: monospace;
+            max-width: 450px;
+            margin: 100px auto;
+            padding: 20px;
+        }
+        input, button {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            margin: 12px 0;
+            box-sizing: border-box;
+        }
+        input {
+            background: #111;
+            color: white;
+            border: 1px solid #00ff88;
+        }
+        button {
+            background: #00ff88;
+            border: none;
+            cursor: pointer;
+        }
+        a { color: #00ff88; }
+    </style>
+</head>
+<body>
+    <h1>NEXUS LOGIN</h1>
+    <input id="username" placeholder="USERNAME">
+    <input id="password" type="password" placeholder="ACCESS CODE">
+    <button id="login">LOGIN</button>
+    <p id="status"></p>
+    <a href="register.html">CREATE IDENTITY</a>
+
+    <script type="module" src="js/login.js"></script>
+</body>
+</html>
