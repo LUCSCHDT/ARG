@@ -9,31 +9,33 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-database.js";
 
 const usernameInput = document.getElementById("username");
+const passwordInput = document.getElementById("password");
 const registerButton = document.getElementById("register");
 const status = document.getElementById("status");
 
 registerButton.addEventListener("click", async () => {
-
     const username = usernameInput.value.trim();
+    const accessCode = passwordInput.value;
+    const normalized = username.toLowerCase();
 
-    // 1. Vérifier le pseudo
     if (!/^[A-Za-z0-9_]{3,20}$/.test(username)) {
         status.textContent = "INVALID USERNAME";
         return;
     }
 
+    if (accessCode.length < 4 || accessCode.length > 32) {
+        status.textContent = "ACCESS CODE MUST BE 4-32 CHARACTERS";
+        return;
+    }
+
     registerButton.disabled = true;
-    status.textContent = "REGISTERING...";
+    status.textContent = "CREATING IDENTITY...";
 
     try {
-        // 2. Attendre la connexion Firebase
         await ready;
 
         const uid = auth.currentUser.uid;
-
         const playerRef = ref(db, "players/" + uid);
-
-        // 3. Vérifier si ce navigateur possède déjà un profil
         const existing = await get(playerRef);
 
         if (existing.exists()) {
@@ -43,24 +45,11 @@ registerButton.addEventListener("click", async () => {
             return;
         }
 
-        // 4. Normaliser le pseudo
-        const normalizedUsername = username.toLowerCase();
+        const usernameRef = ref(db, "usernames/" + normalized);
 
-        const usernameRef = ref(
-            db,
-            "usernames/" + normalizedUsername
-        );
-
-        // 5. Réserver le pseudo sans collision
         const result = await runTransaction(
             usernameRef,
-            currentValue => {
-                if (currentValue !== null) {
-                    return;
-                }
-
-                return uid;
-            },
+            current => current === null ? uid : undefined,
             { applyLocally: false }
         );
 
@@ -69,37 +58,23 @@ registerButton.addEventListener("click", async () => {
             return;
         }
 
-        // 6. Créer le profil
-        try {
-            await set(playerRef, {
-                username: username,
-                createdAt: serverTimestamp()
-            });
-        } catch (error) {
-            // Libérer le pseudo si la création échoue.
-            // Ne pas supprimer aveuglément une réservation.
-            console.error("PROFILE CREATION FAILED:", error);
-            status.textContent =
-                "PROFILE CREATION FAILED - CHECK FIREBASE";
-            return;
-        }
+        await set(playerRef, {
+            username,
+            accessCode,
+            createdAt: serverTimestamp()
+        });
 
-        // 7. Sauvegarder le pseudo localement
+        localStorage.setItem("nexus_player_uid", uid);
         localStorage.setItem("nexus_username", username);
 
-        status.textContent =
-            "IDENTITY CREATED: " + username;
+        status.textContent = "IDENTITY CREATED: " + username;
 
-        console.log("PLAYER REGISTERED:", username);
+        window.location.href = "chat.html";
 
     } catch (error) {
-        console.error("REGISTRATION ERROR:", error);
-
-        status.textContent =
-            "REGISTRATION FAILED: " + error.message;
-
+        console.error(error);
+        status.textContent = "REGISTRATION ERROR: " + error.message;
     } finally {
         registerButton.disabled = false;
     }
-
 });

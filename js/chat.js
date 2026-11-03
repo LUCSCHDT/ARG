@@ -14,58 +14,57 @@ const input = document.getElementById("messageInput");
 const button = document.getElementById("sendButton");
 const status = document.getElementById("status");
 
-let myUsername = null;
+let currentPlayer = null;
 
 button.disabled = true;
 
 async function startChat() {
     await ready;
 
-    const uid = auth.currentUser.uid;
+    const playerUid = localStorage.getItem("nexus_player_uid");
 
-    // Récupérer le profil du joueur
-    const playerSnapshot = await get(ref(db, "players/" + uid));
-
-    if (!playerSnapshot.exists()) {
+    if (!playerUid) {
         status.textContent = "IDENTITY REQUIRED";
         return;
     }
 
-    myUsername = playerSnapshot.val().username;
+    const playerSnapshot = await get(
+        ref(db, "players/" + playerUid)
+    );
 
-    status.textContent = "CONNECTED AS " + myUsername;
+    if (!playerSnapshot.exists()) {
+        status.textContent = "IDENTITY NOT FOUND";
+        return;
+    }
 
-    // Écouter les messages en direct
+    currentPlayer = playerSnapshot.val();
+    status.textContent = "CONNECTED AS " + currentPlayer.username;
+
     const chatQuery = query(
         ref(db, "chat"),
         limitToLast(50)
     );
 
     onValue(chatQuery, async snapshot => {
-        messagesBox.replaceChildren();
+        const elements = [];
 
-        const messageElements = [];
-
-        for (const child of Object.values(snapshot.val() || {})) {
-            const div = document.createElement("div");
-            div.className = "message";
-
-            // Ancien format : sender = UID Firebase
-            const sender = child.sender;
-
+        for (const message of Object.values(snapshot.val() || {})) {
             const senderSnapshot = await get(
-                ref(db, "players/" + sender)
+                ref(db, "players/" + message.sender)
             );
 
-            const username = senderSnapshot.exists()
+            const senderName = senderSnapshot.exists()
                 ? senderSnapshot.val().username
                 : "UNKNOWN";
 
-            div.textContent = `[${username}] ${child.text}`;
-            messageElements.push(div);
+            const div = document.createElement("div");
+            div.className = "message";
+            div.textContent = `[${senderName}] ${message.text}`;
+
+            elements.push(div);
         }
 
-        messagesBox.replaceChildren(...messageElements);
+        messagesBox.replaceChildren(...elements);
         messagesBox.scrollTop = messagesBox.scrollHeight;
 
     }, error => {
@@ -79,7 +78,7 @@ async function startChat() {
 async function sendMessage() {
     const text = input.value.trim();
 
-    if (!text || !myUsername) return;
+    if (!text || !currentPlayer || text.length > 300) return;
 
     button.disabled = true;
 
