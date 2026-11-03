@@ -35,6 +35,19 @@
             border: none;
             cursor: pointer;
         }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: wait;
+        }
+
+        a {
+            color: #00ff88;
+        }
+
+        #status {
+            overflow-wrap: anywhere;
+        }
     </style>
 </head>
 
@@ -47,21 +60,24 @@
         id="username"
         placeholder="USERNAME"
         maxlength="20"
+        autocomplete="off"
     >
 
     <input
         id="password"
         type="password"
         placeholder="ACCESS CODE"
+        minlength="4"
         maxlength="32"
+        autocomplete="new-password"
     >
 
-    <button id="register">
-        REGISTER
-    </button>
+    <button id="register">REGISTER</button>
 
     <p id="status"></p>
 
-  <script type="module" src="js/register.js?v=3"></script>
+    <a href="login.html">ALREADY REGISTERED? LOGIN</a>
+
+    <script type="module" src="js/register.js?v=4"></script>
 </body>
 </html>

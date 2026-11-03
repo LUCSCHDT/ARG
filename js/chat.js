@@ -40,6 +40,11 @@ async function startChat() {
 
     currentPlayer = playerSnapshot.val();
     status.textContent = "CONNECTED AS " + currentPlayer.username;
+    const accountLinks = document.getElementById("accountLinks");
+
+if (accountLinks) {
+    accountLinks.hidden = true;
+}
 
     const chatQuery = query(
         ref(db, "chat"),
