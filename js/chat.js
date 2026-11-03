@@ -72,9 +72,15 @@ async function startChat() {
     }
 
     // Afficher le bouton LOGOUT
-    if (logoutButton) {
-        logoutButton.hidden = false;
-    }
+   // Afficher le bouton LOGOUT
+const logout = document.getElementById("logoutButton");
+
+if (logout) {
+    logout.removeAttribute("hidden");
+    console.log("NEXUS: LOGOUT ACTIVATED");
+} else {
+    console.error("NEXUS: LOGOUT BUTTON NOT FOUND");
+}
 
     // ======================================
     // MESSAGES EN TEMPS RÉEL
