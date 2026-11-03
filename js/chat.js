@@ -15,13 +15,14 @@ const button = document.getElementById("sendButton");
 const status = document.getElementById("status");
 
 let currentPlayer = null;
+let playerUid = null;
 
 button.disabled = true;
 
 async function startChat() {
     await ready;
 
-    const playerUid = localStorage.getItem("nexus_player_uid");
+    playerUid = localStorage.getItem("nexus_player_uid");
 
     if (!playerUid) {
         status.textContent = "IDENTITY REQUIRED";
@@ -84,9 +85,9 @@ async function sendMessage() {
 
     try {
         await push(ref(db, "chat"), {
-            sender: auth.currentUser.uid,
-            text
-        });
+    sender: playerUid,
+    text
+});
 
         input.value = "";
 
