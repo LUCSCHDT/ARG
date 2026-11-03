@@ -1,4 +1,4 @@
-import { auth, db, ready } from "./firebase.js";
+import { db, ready } from "./firebase.js";
 
 import {
     ref,
@@ -9,108 +9,198 @@ import {
     limitToLast
 } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-database.js";
 
+// ==========================================
+// NEXUS CHAT — CONFIGURATION
+// ==========================================
+
 const messagesBox = document.getElementById("messages");
 const input = document.getElementById("messageInput");
-const button = document.getElementById("sendButton");
+const sendButton = document.getElementById("sendButton");
 const status = document.getElementById("status");
+
+const logoutButton = document.getElementById("logoutButton");
+const accountLinks = document.getElementById("accountLinks");
 
 let currentPlayer = null;
 let playerUid = null;
 
-button.disabled = true;
+// Désactiver l'envoi avant la connexion
+sendButton.disabled = true;
+
+// ==========================================
+// INITIALISATION
+// ==========================================
 
 async function startChat() {
     await ready;
 
+    // Récupérer l'identité fictive NEXUS
     playerUid = localStorage.getItem("nexus_player_uid");
 
     if (!playerUid) {
         status.textContent = "IDENTITY REQUIRED";
+
+        if (accountLinks) {
+            accountLinks.hidden = false;
+        }
+
         return;
     }
 
+    // Chercher le profil dans Firebase
     const playerSnapshot = await get(
         ref(db, "players/" + playerUid)
     );
 
     if (!playerSnapshot.exists()) {
         status.textContent = "IDENTITY NOT FOUND";
+
+        localStorage.removeItem("nexus_player_uid");
+        localStorage.removeItem("nexus_username");
+
         return;
     }
 
     currentPlayer = playerSnapshot.val();
-    status.textContent = "CONNECTED AS " + currentPlayer.username;
-    const accountLinks = document.getElementById("accountLinks");
 
-if (accountLinks) {
-    accountLinks.hidden = true;
-}
+    status.textContent =
+        "CONNECTED AS " + currentPlayer.username;
+
+    // Masquer les liens LOGIN / REGISTER
+    if (accountLinks) {
+        accountLinks.hidden = true;
+    }
+
+    // Afficher le bouton LOGOUT
+    if (logoutButton) {
+        logoutButton.hidden = false;
+    }
+
+    // ======================================
+    // MESSAGES EN TEMPS RÉEL
+    // ======================================
 
     const chatQuery = query(
         ref(db, "chat"),
         limitToLast(50)
     );
 
-    onValue(chatQuery, async snapshot => {
-        const elements = [];
+    onValue(
+        chatQuery,
 
-        for (const message of Object.values(snapshot.val() || {})) {
-            const senderSnapshot = await get(
-                ref(db, "players/" + message.sender)
-            );
+        async snapshot => {
+            const elements = [];
 
-            const senderName = senderSnapshot.exists()
-                ? senderSnapshot.val().username
-                : "UNKNOWN";
+            // Parcourir les messages
+            for (const message of Object.values(snapshot.val() || {})) {
 
-            const div = document.createElement("div");
-            div.className = "message";
-            div.textContent = `[${senderName}] ${message.text}`;
+                let senderName = "UNKNOWN";
 
-            elements.push(div);
+                // Chercher le pseudo de l'expéditeur
+                if (message.sender) {
+                    const senderSnapshot = await get(
+                        ref(db, "players/" + message.sender)
+                    );
+
+                    if (senderSnapshot.exists()) {
+                        senderName = senderSnapshot.val().username;
+                    }
+                }
+
+                const div = document.createElement("div");
+                div.className = "message";
+
+                // textContent évite d'exécuter du HTML envoyé par un joueur
+                div.textContent =
+                    `[${senderName}] ${message.text}`;
+
+                elements.push(div);
+            }
+
+            messagesBox.replaceChildren(...elements);
+
+            // Défiler automatiquement vers le bas
+            messagesBox.scrollTop = messagesBox.scrollHeight;
+        },
+
+        error => {
+            console.error("CHAT READ ERROR:", error);
+            status.textContent = "CHAT ERROR";
         }
+    );
 
-        messagesBox.replaceChildren(...elements);
-        messagesBox.scrollTop = messagesBox.scrollHeight;
-
-    }, error => {
-        console.error(error);
-        status.textContent = "CHAT ERROR";
-    });
-
-    button.disabled = false;
+    sendButton.disabled = false;
 }
+
+// ==========================================
+// ENVOYER UN MESSAGE
+// ==========================================
 
 async function sendMessage() {
     const text = input.value.trim();
 
-    if (!text || !currentPlayer || text.length > 300) return;
+    if (!text || !currentPlayer || !playerUid) {
+        return;
+    }
 
-    button.disabled = true;
+    if (text.length > 300) {
+        status.textContent = "MESSAGE TOO LONG";
+        return;
+    }
+
+    sendButton.disabled = true;
 
     try {
         await push(ref(db, "chat"), {
-    sender: playerUid,
-    text
-});
+            sender: playerUid,
+            text: text
+        });
 
         input.value = "";
 
     } catch (error) {
-        console.error(error);
-        status.textContent = "SEND ERROR";
+        console.error("SEND ERROR:", error);
+        status.textContent = "SEND ERROR: " + error.message;
+
     } finally {
-        button.disabled = false;
+        sendButton.disabled = false;
     }
 }
 
-button.addEventListener("click", sendMessage);
+// ==========================================
+// LOGOUT
+// ==========================================
+
+function logout() {
+    // Effacer uniquement la session fictive
+    localStorage.removeItem("nexus_player_uid");
+    localStorage.removeItem("nexus_username");
+
+    // Retourner à la page de connexion
+    window.location.replace("login.html");
+}
+
+// ==========================================
+// ÉVÉNEMENTS
+// ==========================================
+
+sendButton.addEventListener("click", sendMessage);
 
 input.addEventListener("keydown", event => {
-    if (event.key === "Enter") sendMessage();
+    if (event.key === "Enter") {
+        sendMessage();
+    }
 });
 
+if (logoutButton) {
+    logoutButton.addEventListener("click", logout);
+}
+
+// ==========================================
+// DÉMARRAGE
+// ==========================================
+
 startChat().catch(error => {
-    console.error(error);
-    status.textContent = "CONNECTION ERROR";
+    console.error("NEXUS START ERROR:", error);
+    status.textContent = "CONNECTION ERROR: " + error.message;
 });
