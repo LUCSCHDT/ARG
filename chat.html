@@ -3,16 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>NEXUS CHAT</title>
+
+    <title>NEXUS — CHAT</title>
 
     <style>
         body {
-            background: #111;
+            background: #0b0f0d;
             color: #00ff88;
             font-family: monospace;
             max-width: 700px;
             margin: 40px auto;
             padding: 20px;
+        }
+
+        h1 {
+            color: #00ff88;
+        }
+
+        #status {
+            font-size: 13px;
+            margin-bottom: 15px;
+        }
+
+        #accountLinks {
+            margin-bottom: 20px;
+        }
+
+        #accountLinks a {
+            color: #00ff88;
+            text-decoration: underline;
+        }
+
+        #logoutButton {
+            display: inline-block;
+            background: transparent;
+            color: #ff5555;
+            border: 1px solid #ff5555;
+            padding: 8px 16px;
+            margin-bottom: 20px;
+            cursor: pointer;
+            font-family: monospace;
+        }
+
+        #logoutButton:hover {
+            background: #ff5555;
+            color: black;
         }
 
         #messages {
@@ -28,49 +63,62 @@
             overflow-wrap: anywhere;
         }
 
-        input {
+        #messageInput {
+            background: #111;
+            color: white;
+            border: 1px solid #00ff88;
             padding: 10px;
             width: 70%;
             box-sizing: border-box;
         }
 
-        button {
-            padding: 10px;
+        #sendButton {
+            background: #00ff88;
+            border: none;
+            padding: 11px 20px;
             cursor: pointer;
+        }
+
+        #sendButton:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        [hidden] {
+            display: none !important;
         }
     </style>
 </head>
 
 <body>
-    <h1>NEXUS CHAT</h1>
-    
-    <p id="status">CONNECTING...</p>
-    <button id="logoutButton" hidden>
-    LOGOUT
-</button>
-    
-    <div id="accountLinks">
-    <a href="register.html">CREATE ACCOUNT</a>
-    |
-    <a href="login.html">LOGIN</a>
-</div>
 
-<style>
-    #accountLinks a {
-        color: #00ff88;
-        text-decoration: underline;
-        cursor: pointer;
-    }
-</style>
+    <h1>NEXUS CHAT</h1>
+
+    <p id="status">CONNECTING...</p>
+
+    <!-- Liens visibles uniquement hors connexion -->
+    <div id="accountLinks">
+        <a href="register.html">CREATE ACCOUNT</a>
+        |
+        <a href="login.html">LOGIN</a>
+    </div>
+
+    <!-- Bouton séparé, visible uniquement connecté -->
+    <button id="logoutButton" hidden>
+        LOGOUT
+    </button>
 
     <div id="messages"></div>
 
-    <input id="messageInput"
-           maxlength="300"
-           placeholder="Écrire un message...">
+    <input
+        id="messageInput"
+        maxlength="300"
+        placeholder="Écrire un message..."
+    >
 
     <button id="sendButton">SEND</button>
 
-    <script type="module" src="js/chat.js"></script>
+    <script type="module" src="js/chat.js?v=6"></script>
+
 </body>
 </html>
